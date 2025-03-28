@@ -1,9 +1,11 @@
+using GB.AI.Ollama;
 using GB.Core.Controller;
 using GB.Core.Gui;
-using Button = GB.Core.Controller.Button;
-using GB.WinForms.OsSpecific;
 using GB.Core.Sound;
-using GB.AI.Ollama;
+using GB.WinForms.OsSpecific;
+using System.Diagnostics;
+using System.Windows.Forms;
+using Button = GB.Core.Controller.Button;
 
 namespace GB.WinForms
 {
@@ -206,6 +208,9 @@ namespace GB.WinForms
             // use the AI Action Generator to generate the next action
             string imageLocation = "capture.png";
             var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
+
+            AddLog(actionResponse);
+
             // get the PressKey from the actionResponse
             var pressKey = actionResponse.PressKey;
             aiRecentActivity = actionResponse.RecentActivity;
@@ -258,6 +263,22 @@ namespace GB.WinForms
             // Cancel the AI loop if it's running
             _aiLoopCancellation?.Cancel();
             _aiLoopCancellation = null;
+        }
+
+        void AddLog(ActionResponse actionResponse)
+        {
+            string message = $"Key: {actionResponse.PressKey}\n{actionResponse.RecentActivity}";
+            AddLog(message);
+        }
+
+        void AddLog(string message)
+        {
+            var logMessage = $"{DateTime.Now}: {message}";
+            // add a log in the debug and the textbox named textBoxLog including a datetime stamp and the message, add the log always at the start of the textbox
+            textBoxLog.Text = logMessage + Environment.NewLine + textBoxLog.Text;
+            // add the log to the debug console
+            Debug.WriteLine(logMessage);
+
         }
 
     }

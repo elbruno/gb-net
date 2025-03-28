@@ -51,11 +51,17 @@ namespace GB.WinForms
             autodetectToolStripMenuItem = new ToolStripMenuItem();
             dMGClassicToolStripMenuItem = new ToolStripMenuItem();
             gameBoyColorToolStripMenuItem = new ToolStripMenuItem();
-            _display = new GB.WinForms.OsSpecific.BitmapDisplay();
             aIInteractionToolStripMenuItem = new ToolStripMenuItem();
             startToolStripMenuItem = new ToolStripMenuItem();
             stopToolStripMenuItem = new ToolStripMenuItem();
+            _display = new GB.WinForms.OsSpecific.BitmapDisplay();
+            splitContainerGB = new SplitContainer();
+            textBoxLog = new TextBox();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainerGB).BeginInit();
+            splitContainerGB.Panel1.SuspendLayout();
+            splitContainerGB.Panel2.SuspendLayout();
+            splitContainerGB.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -204,19 +210,6 @@ namespace GB.WinForms
             gameBoyColorToolStripMenuItem.Text = "Game Boy &Color";
             gameBoyColorToolStripMenuItem.Click += GameBoyModeClicked;
             // 
-            // _display
-            // 
-            _display.BackColor = Color.FromArgb(0, 230, 248, 218);
-            _display.DisplayEnabled = false;
-            _display.Dock = DockStyle.Fill;
-            _display.Location = new Point(0, 28);
-            _display.Margin = new Padding(2, 2, 2, 2);
-            _display.Name = "_display";
-            _display.Size = new Size(1000, 810);
-            _display.TabIndex = 1;
-            _display.TabStop = false;
-            _display.Text = "Game Boy Display";
-            // 
             // aIInteractionToolStripMenuItem
             // 
             aIInteractionToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { startToolStripMenuItem, stopToolStripMenuItem });
@@ -227,30 +220,79 @@ namespace GB.WinForms
             // startToolStripMenuItem
             // 
             startToolStripMenuItem.Name = "startToolStripMenuItem";
-            startToolStripMenuItem.Size = new Size(224, 26);
+            startToolStripMenuItem.Size = new Size(123, 26);
             startToolStripMenuItem.Text = "Start";
             startToolStripMenuItem.Click += startToolStripMenuItem_ClickAsync;
             // 
             // stopToolStripMenuItem
             // 
             stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            stopToolStripMenuItem.Size = new Size(224, 26);
+            stopToolStripMenuItem.Size = new Size(123, 26);
             stopToolStripMenuItem.Text = "Stop";
             stopToolStripMenuItem.Click += stopToolStripMenuItem_Click;
+            // 
+            // _display
+            // 
+            _display.BackColor = Color.FromArgb(0, 230, 248, 218);
+            _display.DisplayEnabled = false;
+            _display.Dock = DockStyle.Fill;
+            _display.Location = new Point(0, 0);
+            _display.Margin = new Padding(2);
+            _display.Name = "_display";
+            _display.Size = new Size(1000, 654);
+            _display.TabIndex = 1;
+            _display.TabStop = false;
+            _display.Text = "Game Boy Display";
+            // 
+            // splitContainerGB
+            // 
+            splitContainerGB.Dock = DockStyle.Fill;
+            splitContainerGB.Location = new Point(0, 28);
+            splitContainerGB.Name = "splitContainerGB";
+            splitContainerGB.Orientation = Orientation.Horizontal;
+            // 
+            // splitContainerGB.Panel1
+            // 
+            splitContainerGB.Panel1.Controls.Add(_display);
+            // 
+            // splitContainerGB.Panel2
+            // 
+            splitContainerGB.Panel2.Controls.Add(textBoxLog);
+            splitContainerGB.Size = new Size(1000, 810);
+            splitContainerGB.SplitterDistance = 654;
+            splitContainerGB.TabIndex = 2;
+            splitContainerGB.TabStop = false;
+            // 
+            // textBoxLog
+            // 
+            textBoxLog.Dock = DockStyle.Fill;
+            textBoxLog.Location = new Point(0, 0);
+            textBoxLog.Multiline = true;
+            textBoxLog.Name = "textBoxLog";
+            textBoxLog.ReadOnly = true;
+            textBoxLog.ScrollBars = ScrollBars.Vertical;
+            textBoxLog.Size = new Size(1000, 152);
+            textBoxLog.TabIndex = 0;
+            textBoxLog.TabStop = false;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(120F, 120F);
             AutoScaleMode = AutoScaleMode.Dpi;
             ClientSize = new Size(1000, 838);
-            Controls.Add(_display);
+            Controls.Add(splitContainerGB);
             Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "MainForm";
             Text = "GB.NET";
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            splitContainerGB.Panel1.ResumeLayout(false);
+            splitContainerGB.Panel2.ResumeLayout(false);
+            splitContainerGB.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)splitContainerGB).EndInit();
+            splitContainerGB.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
 
@@ -280,5 +322,7 @@ namespace GB.WinForms
         private ToolStripMenuItem aIInteractionToolStripMenuItem;
         private ToolStripMenuItem startToolStripMenuItem;
         private ToolStripMenuItem stopToolStripMenuItem;
+        private SplitContainer splitContainerGB;
+        private TextBox textBoxLog;
     }
 }
