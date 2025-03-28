@@ -10,7 +10,7 @@ namespace GB.AI.Ollama
     {
 
         string userPrompt = @"""
-You are an expert playing the game ""Pokemon Red"" for Nintendo GameBoy.
+You are an expert playing the game ""PacMan"" for Nintendo GameBoy.
 You are going to be provided with images that represents the current game frame plus a history of the recent activities.
 
 These are the key bindings:
@@ -23,23 +23,22 @@ These are the key bindings:
 {Keys.Enter, Button.Start},
 {Keys.Back, Button.Select}
 
-Analyze the current game frame, and using the recent game activity suggest the next action that the console need to perform. 
-That means which key to press. In example: 'Keys.A' or 'Keys.D'
-Based on the action and the recent activity, generate a new recent activity string that will be used for the next action. The recent activity should contain the history of the movements and actions performed by the player.
+Analyze the current game frame, and using the recent game activity suggest the next key that need to be pressed. The goal is to win the game.
+The key to press should a string, in example: 'Keys.A' or 'Keys.D'
+Generate a recent activity history with a complete description of the current game frame, and include the previous recent activity..
 
 The expected output should be a JSON object with 2 string fields:
 - RecentActivity
 - PressKey
 
 Suggested Rules:
-- if the player is just looking around, move in any direction to discover new stuff.
-- if the player hit the end of the screen, move in the opposite direction.
-- if the player is part of a conversation, process the conversation for the recent activity history and press 'K' to move forward.
-- if the player is in a conversation and there is an down arrow to read more, press 'K' to move forward.
-- if the player is prompted to start a new game, always start a new game. Press 'Enter' to start.
+- On the start screen, suggest to press 'Keys.Enter' to start the game.
+- Based on the recent activity, suggest the next key to press.
+- Avoid the ghosts, follow the standard PacMan rules.
 
 Return only the JSON object as a string.
 
+---
 This is the Recent Activity:
 """;
 
@@ -84,8 +83,9 @@ This is the Recent Activity:
                 new ChatMessage(ChatRole.User, userPrompt + $"{Environment.NewLine}{recentActivity}")
             };
 
-            var chatOllama = new OllamaChatClient(new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
-            //new Uri(uriString: "http://localhost:11434/"), "gemma3");
+            var chatOllama = new OllamaChatClient(
+            //    new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
+            new Uri(uriString: "http://localhost:11434/"), "gemma3");
 
             // in ollama the image should be added as byte array
             messages.Add(new ChatMessage(ChatRole.User, [new DataContent(imageBytes, mediaType)]));

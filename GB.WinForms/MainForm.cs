@@ -192,26 +192,41 @@ namespace GB.WinForms
         // AI Stuff
         private async Task ProcessNextAiActionAsync()
         {
-            // save the _display content to a local image
-            using var bitmap = new Bitmap(_display.Width, _display.Height);
-            _display.DrawToBitmap(bitmap, new Rectangle(0, 0, bitmap.Width, bitmap.Height));
-            string imageLocation = CapturesManager.SaveScreenCapture(bitmap);
-
-            // use the AI Action Generator to generate the next action
-            var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
-            AddLog(actionResponse);
-
-            // get the PressKey from the actionResponse
-            var pressKey = actionResponse.PressKey;
-            aiRecentActivity = actionResponse.RecentActivity;
-            Keys key = ParseKeyString(pressKey);
-
-            var button = _controls.ContainsKey(key) ? _controls[key] : null;
-            if (button != null)
+            try
             {
-                _listener?.OnButtonPress(button);
-                await Task.Delay(100);
-                _listener?.OnButtonRelease(button);
+                _emulator.TogglePause();
+
+                // save the _display content to a local image
+                using var bitmap = new Bitmap(_display.Width, _display.Height);
+                _display.DrawToBitmap(bitmap, new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+                string imageLocation = CapturesManager.SaveScreenCapture(bitmap);
+
+                // use the AI Action Generator to generate the next action
+                var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
+                AddLog(actionResponse);
+
+                // get the PressKey from the actionResponse
+                var pressKey = actionResponse.PressKey;
+                aiRecentActivity = actionResponse.RecentActivity;
+                Keys key = ParseKeyString(pressKey);
+
+                var button = _controls.ContainsKey(key) ? _controls[key] : null;
+                if (button != null)
+                {
+                    _listener?.OnButtonPress(button);
+                    _emulator.TogglePause();
+                    await Task.Delay(1000);
+                    _emulator.TogglePause();
+                    _listener?.OnButtonRelease(button);
+                }
+            }
+            catch (Exception ex)
+            {
+                AddLog(ex.Message);
+            }
+            finally
+            {
+                _emulator.TogglePause();
             }
         }
 
@@ -243,8 +258,8 @@ namespace GB.WinForms
             while (!cancellationToken.IsCancellationRequested)
             {
                 await ProcessNextAiActionAsync();
-                // Wait 0.2 second before the next action
-                await Task.Delay(200, cancellationToken);
+                // Wait 0.05 second before the next action
+                await Task.Delay(50, cancellationToken);
             }
         }
 
