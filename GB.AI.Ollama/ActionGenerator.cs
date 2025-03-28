@@ -79,7 +79,7 @@ This is the Recent Activity:
 
             byte[] imageBytes = File.ReadAllBytes(imageLocation);
 
-            IChatClient chatClient = GetAoaiChatClient();
+            IChatClient chatClient = GetOllamaChatClient();
 
             List<ChatMessage> messages =
             [
