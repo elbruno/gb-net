@@ -190,49 +190,29 @@ namespace GB.WinForms
         }
 
         // AI Stuff
-        private async Task<string> ProcessNextAiActionAsync()
+        private async Task ProcessNextAiActionAsync()
         {
             // save the _display content to a local image
             using var bitmap = new Bitmap(_display.Width, _display.Height);
             _display.DrawToBitmap(bitmap, new Rectangle(0, 0, bitmap.Width, bitmap.Height));
-
-            // if the file "capture.png" exists, delete it
-            if (File.Exists("capture.png"))
-            {
-                File.Delete("capture.png");
-            }
-
-            // save the image to a file named "capture.png"
-            bitmap.Save("capture.png", System.Drawing.Imaging.ImageFormat.Png);
+            string imageLocation = CapturesManager.SaveScreenCapture(bitmap);
 
             // use the AI Action Generator to generate the next action
-            string imageLocation = "capture.png";
             var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
-
             AddLog(actionResponse);
 
             // get the PressKey from the actionResponse
             var pressKey = actionResponse.PressKey;
             aiRecentActivity = actionResponse.RecentActivity;
-
-
-
-
-
-            // convert the string pressKey to a value from the Keys enum
             Keys key = ParseKeyString(pressKey);
 
             var button = _controls.ContainsKey(key) ? _controls[key] : null;
             if (button != null)
             {
                 _listener?.OnButtonPress(button);
-                await Task.Delay(500);
+                await Task.Delay(100);
                 _listener?.OnButtonRelease(button);
-
-
             }
-
-            return pressKey;
         }
 
         private void startToolStripMenuItem_ClickAsync(object sender, EventArgs e)
@@ -262,13 +242,9 @@ namespace GB.WinForms
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                string pressedKey = await ProcessNextAiActionAsync();
-
-                // Log the action if needed
-                Console.WriteLine($"AI pressed: {pressedKey}");
-
-                // Wait 1 second before the next action
-                await Task.Delay(1000, cancellationToken);
+                await ProcessNextAiActionAsync();
+                // Wait 0.2 second before the next action
+                await Task.Delay(200, cancellationToken);
             }
         }
 

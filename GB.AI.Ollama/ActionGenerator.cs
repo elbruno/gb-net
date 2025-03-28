@@ -35,6 +35,8 @@ Suggested Rules:
 - if the player is just looking around, move in any direction to discover new stuff.
 - if the player hit the end of the screen, move in the opposite direction.
 - if the player is part of a conversation, process the conversation for the recent activity history and press 'K' to move forward.
+- if the player is in a conversation and there is an down arrow to read more, press 'K' to move forward.
+- if the player is prompted to start a new game, always start a new game. Press 'Enter' to start.
 
 Return only the JSON object as a string.
 

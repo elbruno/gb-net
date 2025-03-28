@@ -17,5 +17,11 @@
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="images\readme.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 	
 </Project>
