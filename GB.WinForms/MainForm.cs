@@ -215,9 +215,12 @@ namespace GB.WinForms
             var pressKey = actionResponse.PressKey;
             aiRecentActivity = actionResponse.RecentActivity;
 
-            // convert the string pressKey to a value from the Keys enum
 
-            Keys key = Enum.Parse<Keys>(pressKey, true);
+
+
+
+            // convert the string pressKey to a value from the Keys enum
+            Keys key = ParseKeyString(pressKey);
 
             var button = _controls.ContainsKey(key) ? _controls[key] : null;
             if (button != null)
@@ -278,19 +281,57 @@ namespace GB.WinForms
 
         void AddLog(ActionResponse actionResponse)
         {
-            string message = $"Key: {actionResponse.PressKey}{Environment.NewLine}\t{actionResponse.RecentActivity}";
+            string message = $"Key: {actionResponse.PressKey}|\t{actionResponse.RecentActivity}";
             AddLog(message);
         }
 
         void AddLog(string message)
         {
-            var logMessage = $"{DateTime.Now}: {message}";
-            // add a log in the debug and the textbox named textBoxLog including a datetime stamp and the message, add the log always at the start of the textbox
+            var logMessage = $"{DateTime.Now:HH:mm:ss}: {message}";
             textBoxLog.Text = logMessage + Environment.NewLine + textBoxLog.Text;
-            // add the log to the debug console
             Debug.WriteLine(logMessage);
-
         }
+
+        /// <summary>
+        /// Converts a string representation of a key (e.g., "Keys.A") to the corresponding Keys enum value.
+        /// </summary>
+        /// <param name="keyString">String representation of the key (e.g., "Keys.A", "Keys.Enter")</param>
+        /// <returns>The corresponding Keys enum value if successful, null if parsing fails</returns>
+        private Keys ParseKeyString(string keyString)
+        {
+            var defaultValue = Keys.Back; // Default to Back key if empty
+
+            if (string.IsNullOrEmpty(keyString))
+            {
+                AddLog("Empty key string provided");
+                return defaultValue;
+            }
+
+            try
+            {
+                // If the string starts with "Keys.", remove that prefix
+                if (keyString.StartsWith("Keys.", StringComparison.OrdinalIgnoreCase))
+                {
+                    keyString = keyString.Substring(5); // "Keys.".Length == 5
+                }
+
+                // Try to parse the key name to get the enum value
+                if (Enum.TryParse<Keys>(keyString, true, out var key))
+                {
+                    return key;
+                }
+
+                AddLog($"Failed to parse key: {keyString}");
+                return defaultValue;
+            }
+            catch (Exception ex)
+            {
+                AddLog($"Error parsing key string: {ex.Message}");
+                return defaultValue;
+
+            }
+        }
+
 
     }
 }

@@ -266,6 +266,7 @@ namespace GB.WinForms
             // textBoxLog
             // 
             textBoxLog.Dock = DockStyle.Fill;
+            textBoxLog.Font = new Font("Consolas", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBoxLog.Location = new Point(0, 0);
             textBoxLog.Multiline = true;
             textBoxLog.Name = "textBoxLog";

@@ -10,7 +10,7 @@ namespace GB.AI.Ollama
     {
 
         string userPrompt = @"""
-You are an expert playing the game ""the legend of Zelda links awakening"" for Nintendo GameBoy.
+You are an expert playing the game ""Pokemon Red"" for Nintendo GameBoy.
 You are going to be provided with images that represents the current game frame plus a history of the recent activities.
 
 These are the key bindings:
@@ -23,11 +23,18 @@ These are the key bindings:
 {Keys.Enter, Button.Start},
 {Keys.Back, Button.Select}
 
-Analyze the current game frame, and using the recent game activity suggest the next action that the console need to perform. That means which key to press. In example: 'Keys.A' or 'Keys.D'
+Analyze the current game frame, and using the recent game activity suggest the next action that the console need to perform. 
+That means which key to press. In example: 'Keys.A' or 'Keys.D'
+Based on the action and the recent activity, generate a new recent activity string that will be used for the next action. The recent activity should contain the history of the movements and actions performed by the player.
 
 The expected output should be a JSON object with 2 string fields:
 - RecentActivity
 - PressKey
+
+Suggested Rules:
+- if the player is just looking around, move in any direction to discover new stuff.
+- if the player hit the end of the screen, move in the opposite direction.
+- if the player is part of a conversation, process the conversation for the recent activity history and press 'K' to move forward.
 
 Return only the JSON object as a string.
 
@@ -75,21 +82,14 @@ This is the Recent Activity:
                 new ChatMessage(ChatRole.User, userPrompt + $"{Environment.NewLine}{recentActivity}")
             };
 
-            StringBuilder stringBuilder = new StringBuilder();
-            Console.WriteLine($"Using Ollama");
-
-            var chatOllama = new OllamaChatClient(
-                new Uri(uriString: "http://localhost:11434/"), "gemma3");
+            var chatOllama = new OllamaChatClient(new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
+            //new Uri(uriString: "http://localhost:11434/"), "gemma3");
 
             // in ollama the image should be added as byte array
             messages.Add(new ChatMessage(ChatRole.User, [new DataContent(imageBytes, mediaType)]));
 
             var imageAnalysis = await chatOllama.GetResponseAsync(messages);
-            stringBuilder.AppendLine("Ollama: ");
-            stringBuilder.AppendLine(imageAnalysis.Message.Text);
-            stringBuilder.AppendLine();
-            Debug.WriteLine($">> Ollama done");
-            Debug.WriteLine(stringBuilder.ToString());
+            Debug.WriteLine($">> Ollama: {imageAnalysis.Message.Text}");
 
             return imageAnalysis.Message.Text;
         }
