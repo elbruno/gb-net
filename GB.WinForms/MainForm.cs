@@ -205,19 +205,39 @@ namespace GB.WinForms
                 var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
                 AddLog(actionResponse);
 
+                // delete the created file
+                if (File.Exists(imageLocation))
+                {
+                    File.Delete(imageLocation);
+                }
+
                 // get the PressKey from the actionResponse
                 var pressKey = actionResponse.PressKey;
-                aiRecentActivity = actionResponse.RecentActivity;
+                aiRecentActivity = ""; // actionResponse.RecentActivity;
                 Keys key = ParseKeyString(pressKey);
 
                 var button = _controls.ContainsKey(key) ? _controls[key] : null;
                 if (button != null)
                 {
+                    // fake fire
+                    _emulator.TogglePause();
+                    _listener?.OnButtonPress(_controls[Keys.K]);
+                    await Task.Delay(20);
+                    _listener?.OnButtonRelease(_controls[Keys.K]);
+                    _emulator.TogglePause();
+
+                    // perform move
                     _listener?.OnButtonPress(button);
                     _emulator.TogglePause();
                     await Task.Delay(1000);
                     _emulator.TogglePause();
                     _listener?.OnButtonRelease(button);
+
+                    _emulator.TogglePause();
+                    _listener?.OnButtonPress(_controls[Keys.K]);
+                    await Task.Delay(20);
+                    _listener?.OnButtonRelease(_controls[Keys.K]);
+                    _emulator.TogglePause();
                 }
             }
             catch (Exception ex)

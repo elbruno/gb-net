@@ -4,15 +4,23 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>9f5d150d-2809-45cb-8279-ab56ac027187</UserSecretsId>
   </PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Clowd.Clipboard" Version="1.1.4" />
 		<PackageReference Include="Clowd.Clipboard.Gdi" Version="1.1.4" />
-		<PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25114.11" />
-		<PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.3.0-preview.1.25114.11" />
-		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25114.11" />
+		<PackageReference Include="Microsoft.Extensions.AI" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.Extensions.AI.AzureAIInference" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.Extensions.AI.Ollama" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.3.0-preview.1.25161.3" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+
 		<PackageReference Include="TextCopy" Version="6.2.1" />
+		<PackageReference Include="Azure.AI.OpenAI" Version="2.2.0-beta.4" />
+		<PackageReference Include="Azure.Identity" Version="1.14.0-beta.2" />
+		<PackageReference Include="OpenAI" Version="2.2.0-beta.4" />
+
 	</ItemGroup>
 
 </Project>

@@ -1,5 +1,9 @@
-﻿using Microsoft.Extensions.AI;
+﻿using Azure;
+using Azure.AI.Inference;
+using Azure.Identity;
+using Microsoft.Extensions.AI;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime;
 using System.Text;
 using System.Text.Json;
@@ -10,10 +14,10 @@ namespace GB.AI.Ollama
     {
 
         string userPrompt = @"""
-You are an expert playing the game ""PacMan"" for Nintendo GameBoy.
-You are going to be provided with images that represents the current game frame plus a history of the recent activities.
+You are an expert playing the game ""Galaga"" for Nintendo GameBoy.
+You are going to be provided with an image that represents the current game frame plus a history of the previous game frames description.
 
-These are the key bindings:
+These are the key bindings for the Windows Keys and the GameBoy keys:
 {Keys.A, Button.Left},
 {Keys.D, Button.Right},
 {Keys.W, Button.Up},
@@ -23,18 +27,16 @@ These are the key bindings:
 {Keys.Enter, Button.Start},
 {Keys.Back, Button.Select}
 
-Analyze the current game frame, and using the recent game activity suggest the next key that need to be pressed. The goal is to win the game.
+Analyze in details the current game frame, and using the recent game activity suggest the next key that need to be pressed. The goal is to win the game.
 The key to press should a string, in example: 'Keys.A' or 'Keys.D'
-Generate a recent activity history with a complete description of the current game frame, and include the previous recent activity..
+Generate a recent activity history that includes a complete description of the current game frame, and the previous game frame.
 
 The expected output should be a JSON object with 2 string fields:
 - RecentActivity
 - PressKey
 
-Suggested Rules:
-- On the start screen, suggest to press 'Keys.Enter' to start the game.
-- Based on the recent activity, suggest the next key to press.
-- Avoid the ghosts, follow the standard PacMan rules.
+Rules:
+- The lower left small ships are note the player, are the remaining lives
 
 Return only the JSON object as a string.
 
@@ -77,24 +79,40 @@ This is the Recent Activity:
 
             byte[] imageBytes = File.ReadAllBytes(imageLocation);
 
+            IChatClient chatClient = GetAoaiChatClient();
 
-            List<ChatMessage> messages = new List<ChatMessage>
-            {
-                new ChatMessage(ChatRole.User, userPrompt + $"{Environment.NewLine}{recentActivity}")
-            };
+            List<ChatMessage> messages =
+            [
+                new ChatMessage(Microsoft.Extensions.AI.ChatRole.User, userPrompt + $"{Environment.NewLine}{recentActivity}"),
+                new ChatMessage(Microsoft.Extensions.AI.ChatRole.User, [new DataContent(imageBytes, mediaType)])
+            ];
 
-            var chatOllama = new OllamaChatClient(
-            //    new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
-            new Uri(uriString: "http://localhost:11434/"), "gemma3");
+            var imageAnalysis = await chatClient.GetResponseAsync(messages);
+            Debug.WriteLine($">> Chat: {imageAnalysis.Text}");
 
-            // in ollama the image should be added as byte array
-            messages.Add(new ChatMessage(ChatRole.User, [new DataContent(imageBytes, mediaType)]));
-
-            var imageAnalysis = await chatOllama.GetResponseAsync(messages);
-            Debug.WriteLine($">> Ollama: {imageAnalysis.Message.Text}");
-
-            return imageAnalysis.Message.Text;
+            return imageAnalysis.Text;
         }
+
+        private static IChatClient GetOllamaChatClient()
+        {
+            // OllamaChatClient is a wrapper around the Ollama API
+            var chatOllama = new OllamaChatClient(
+            //new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
+            new Uri(uriString: "http://localhost:11434/"), "gemma3");
+            //new Uri(uriString: "http://localhost:11434/"), "granite3.2-vision");
+            return chatOllama;
+        }
+
+        //private static IChatClient GetAoaiChatClient()
+        //{
+
+        //    var client = new ChatCompletionsClient(
+        //        endpoint: new Uri(endpoint), 
+        //        credential: new AzureKeyCredential(apiKey))
+        //        .AsChatClient("gpt-4o-mini");
+
+        //    return client;
+        //}
 
         public string GetMediaType(string imageLocation)
         {
