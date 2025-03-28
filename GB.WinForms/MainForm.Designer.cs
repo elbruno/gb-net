@@ -239,7 +239,7 @@ namespace GB.WinForms
             _display.Location = new Point(0, 0);
             _display.Margin = new Padding(2);
             _display.Name = "_display";
-            _display.Size = new Size(1000, 654);
+            _display.Size = new Size(1000, 565);
             _display.TabIndex = 1;
             _display.TabStop = false;
             _display.Text = "Game Boy Display";
@@ -259,20 +259,21 @@ namespace GB.WinForms
             // 
             splitContainerGB.Panel2.Controls.Add(textBoxLog);
             splitContainerGB.Size = new Size(1000, 810);
-            splitContainerGB.SplitterDistance = 654;
+            splitContainerGB.SplitterDistance = 565;
             splitContainerGB.TabIndex = 2;
             splitContainerGB.TabStop = false;
             // 
             // textBoxLog
             // 
             textBoxLog.Dock = DockStyle.Fill;
+            textBoxLog.Enabled = false;
             textBoxLog.Font = new Font("Consolas", 10.2F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBoxLog.Location = new Point(0, 0);
             textBoxLog.Multiline = true;
             textBoxLog.Name = "textBoxLog";
             textBoxLog.ReadOnly = true;
             textBoxLog.ScrollBars = ScrollBars.Vertical;
-            textBoxLog.Size = new Size(1000, 152);
+            textBoxLog.Size = new Size(1000, 241);
             textBoxLog.TabIndex = 0;
             textBoxLog.TabStop = false;
             // 

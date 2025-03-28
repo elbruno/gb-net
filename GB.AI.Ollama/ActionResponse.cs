@@ -4,10 +4,13 @@ namespace GB.AI.Ollama
 {
     public class ActionResponse
     {
-        [JsonPropertyName("RecentActivity")]
-        public string RecentActivity { get; set; }
+        [JsonPropertyName("FrameAnalysis")]
+        public string FrameAnalysis { get; set; }
 
         [JsonPropertyName("PressKey")]
         public string PressKey { get; set; }
+
+        [JsonPropertyName("SuggestedMove")]
+        public string SuggestedMove { get; set; }
     }
 }

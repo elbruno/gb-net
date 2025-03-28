@@ -15,38 +15,40 @@ namespace GB.AI.Ollama
 
         string userPrompt = @"""
 You are an expert playing the game ""Galaga"" for Nintendo GameBoy.
-You are going to be provided with an image that represents the current game frame plus a history of the previous game frames description.
+You are going to be provided with an image that represents the current game frame plus the description of the previous game frame.
 
-These are the key bindings for the Windows Keys and the GameBoy keys:
-{Keys.A, Button.Left},
-{Keys.D, Button.Right},
-{Keys.W, Button.Up},
-{Keys.S, Button.Down},
-{Keys.K, Button.A},
-{Keys.O, Button.B},
-{Keys.Enter, Button.Start},
-{Keys.Back, Button.Select}
+Key Bindings:
+- These are the key bindings for the Windows Keys and the GameBoy keys:
+ Windows Keys.A -> Button.Left
+ Windows Keys.D ->  Button.Right
+ Windows Keys.W ->  Button.Up
+ Windows Keys.S ->  Button.Down
+ Windows Keys.K ->  Button.A
+ Windows Keys.O ->  Button.B
+ Windows Keys.Enter ->  Button.Start
+ Windows Keys.Back -> , Button.Select
 
-Analyze in details the current game frame, and using the recent game activity suggest the next key that need to be pressed. The goal is to win the game.
-The key to press should a string, in example: 'Keys.A' or 'Keys.D'
-Generate a recent activity history that includes a complete description of the current game frame, and the previous game frame.
-
-The expected output should be a JSON object with 2 string fields:
-- RecentActivity
-- PressKey
+Tasks:
+- Analyze the image to get details of the current game frame. Perform a detailed analysis including the position of the player ship, the position of the enemies and the trend of where the enemies are moving or firing.
+- Use using the current frame information and the previous frame information suggest the action that need to done. The goal is to win the game.
+- The suggested actions can be 'Move Right', 'Move Left' or 'Fire'.
+- The key to press should a string, in example: 'Keys.A' or 'Keys.D'
+- The expected output should be a JSON object with 3 string fields: 'FrameAnalysis', 'PressKey' and 'SuggestedMove'.
+- In the 'SuggestedMove' field, add an explanation on why the suggested move.
+- Return only the JSON object as a string.
 
 Rules:
-- The lower left small ships are note the player, are the remaining lives
-
-Return only the JSON object as a string.
+- The lower left small ships are not the player, are the remaining lives.
+- Try to kill as much enemies as you can.
+- The main keys in this game are 'A' to move left, 'D' to move right and 'K' to fire.
 
 ---
-This is the Recent Activity:
+Current Frame:
 """;
 
-        public async Task<ActionResponse> GenerateNextActionResponse(string imageLocation, string recentActivity)
+        public async Task<ActionResponse> GenerateNextActionResponse(string imageLocation, string frameAnalysis)
         {
-            var jsonResponse = await GenerateNextAction(imageLocation, recentActivity);
+            var jsonResponse = await GenerateNextAction(imageLocation, frameAnalysis);
 
             // Ensure we have valid JSON before deserializing
             var validJsonResponse = EnsureValidJsonResponse(jsonResponse);
@@ -66,13 +68,13 @@ This is the Recent Activity:
             // Fallback if JSON parsing fails completely
             return new ActionResponse
             {
-                RecentActivity = recentActivity,
-                PressKey = "Keys.S" // Default key
+                FrameAnalysis = frameAnalysis,
+                PressKey = "Keys.Q" // Default key
             };
         }
 
 
-        public async Task<string> GenerateNextAction(string imageLocation, string recentActivity)
+        public async Task<string> GenerateNextAction(string imageLocation, string frameAnalysis)
         {
             // get the media type from the image location
             var mediaType = GetMediaType(imageLocation);
@@ -83,7 +85,7 @@ This is the Recent Activity:
 
             List<ChatMessage> messages =
             [
-                new ChatMessage(Microsoft.Extensions.AI.ChatRole.User, userPrompt + $"{Environment.NewLine}{recentActivity}"),
+                new ChatMessage(Microsoft.Extensions.AI.ChatRole.User, userPrompt + $"{Environment.NewLine}{frameAnalysis}"),
                 new ChatMessage(Microsoft.Extensions.AI.ChatRole.User, [new DataContent(imageBytes, mediaType)])
             ];
 
@@ -160,7 +162,7 @@ This is the Recent Activity:
 
                 // If we have valid fields, return properly formatted JSON
                 if (actionResponse != null &&
-                    !string.IsNullOrWhiteSpace(actionResponse.RecentActivity) &&
+                    !string.IsNullOrWhiteSpace(actionResponse.FrameAnalysis) &&
                     !string.IsNullOrWhiteSpace(actionResponse.PressKey))
                 {
                     return JsonSerializer.Serialize(actionResponse);
@@ -182,7 +184,7 @@ This is the Recent Activity:
                     {
                         var actionResponse = new ActionResponse
                         {
-                            RecentActivity = recentActivityMatch.Groups[1].Value,
+                            FrameAnalysis = recentActivityMatch.Groups[1].Value,
                             PressKey = pressKeyMatch.Groups[1].Value
                         };
 

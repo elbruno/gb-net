@@ -22,7 +22,7 @@ namespace GB.WinForms
 
         // create an instance of the AI Action Generator
         private readonly ActionGenerator actionGenerator = new ActionGenerator();
-        private string aiRecentActivity = string.Empty;
+        private string currentFrameAnalysis = string.Empty;
         private CancellationTokenSource? _aiLoopCancellation;
 
         public MainForm()
@@ -202,7 +202,7 @@ namespace GB.WinForms
                 string imageLocation = CapturesManager.SaveScreenCapture(bitmap);
 
                 // use the AI Action Generator to generate the next action
-                var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
+                var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, currentFrameAnalysis);
                 AddLog(actionResponse);
 
                 // delete the created file
@@ -213,7 +213,7 @@ namespace GB.WinForms
 
                 // get the PressKey from the actionResponse
                 var pressKey = actionResponse.PressKey;
-                aiRecentActivity = ""; // actionResponse.RecentActivity;
+                currentFrameAnalysis = actionResponse.FrameAnalysis;
                 Keys key = ParseKeyString(pressKey);
 
                 var button = _controls.ContainsKey(key) ? _controls[key] : null;
@@ -222,7 +222,7 @@ namespace GB.WinForms
                     // fake fire
                     _emulator.TogglePause();
                     _listener?.OnButtonPress(_controls[Keys.K]);
-                    await Task.Delay(20);
+                    await Task.Delay(100);
                     _listener?.OnButtonRelease(_controls[Keys.K]);
                     _emulator.TogglePause();
 
@@ -235,7 +235,7 @@ namespace GB.WinForms
 
                     _emulator.TogglePause();
                     _listener?.OnButtonPress(_controls[Keys.K]);
-                    await Task.Delay(20);
+                    await Task.Delay(100);
                     _listener?.OnButtonRelease(_controls[Keys.K]);
                     _emulator.TogglePause();
                 }
@@ -292,7 +292,7 @@ namespace GB.WinForms
 
         void AddLog(ActionResponse actionResponse)
         {
-            string message = $"Key: {actionResponse.PressKey}|\t{actionResponse.RecentActivity}";
+            string message = @$"Key: {actionResponse.PressKey}|{actionResponse.SuggestedMove}{Environment.NewLine}{actionResponse.FrameAnalysis}";
             AddLog(message);
         }
 
