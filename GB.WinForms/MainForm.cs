@@ -214,9 +214,20 @@ namespace GB.WinForms
             // get the PressKey from the actionResponse
             var pressKey = actionResponse.PressKey;
             aiRecentActivity = actionResponse.RecentActivity;
-            
-            // send a press key action using windows API
-            SendKeys.Send(pressKey);
+
+            // convert the string pressKey to a value from the Keys enum
+
+            Keys key = Enum.Parse<Keys>(pressKey, true);
+
+            var button = _controls.ContainsKey(key) ? _controls[key] : null;
+            if (button != null)
+            {
+                _listener?.OnButtonPress(button);
+                await Task.Delay(500);
+                _listener?.OnButtonRelease(button);
+
+
+            }
 
             return pressKey;
         }
@@ -267,7 +278,7 @@ namespace GB.WinForms
 
         void AddLog(ActionResponse actionResponse)
         {
-            string message = $"Key: {actionResponse.PressKey}\n{actionResponse.RecentActivity}";
+            string message = $"Key: {actionResponse.PressKey}{Environment.NewLine}\t{actionResponse.RecentActivity}";
             AddLog(message);
         }
 

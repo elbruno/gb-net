@@ -23,7 +23,7 @@ These are the key bindings:
 {Keys.Enter, Button.Start},
 {Keys.Back, Button.Select}
 
-Analyze the current game frame, and using the recent game activity suggest the next action that the console need to perform. That means which key to press. In example: Key.A or Keys.D
+Analyze the current game frame, and using the recent game activity suggest the next action that the console need to perform. That means which key to press. In example: 'Keys.A' or 'Keys.D'
 
 The expected output should be a JSON object with 2 string fields:
 - RecentActivity
