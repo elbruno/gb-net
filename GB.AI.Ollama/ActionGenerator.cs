@@ -33,6 +33,7 @@ Tasks:
 - Use using the current frame information and the previous frame information suggest the action that need to done. The goal is to win the game.
 - The suggested actions can be 'Move Right', 'Move Left' or 'Fire'.
 - The key to press should a string, in example: 'Keys.A' or 'Keys.D'
+- The main keys in this game are 'A' to move left, 'D' to move right and 'K' to fire.
 - The expected output should be a JSON object with 3 string fields: 'FrameAnalysis', 'PressKey' and 'SuggestedMove'.
 - In the 'SuggestedMove' field, add an explanation on why the suggested move.
 - Return only the JSON object as a string.
@@ -40,7 +41,9 @@ Tasks:
 Rules:
 - The lower left small ships are not the player, are the remaining lives.
 - Try to kill as much enemies as you can.
-- The main keys in this game are 'A' to move left, 'D' to move right and 'K' to fire.
+
+- If the player is in the 'Bottom Left' corner of the screen, do not suggest to 'Move Left'.
+- If the player is in the 'Bottom Right' corner of the screen, do not suggest to 'Move Right'.
 
 ---
 Current Frame:

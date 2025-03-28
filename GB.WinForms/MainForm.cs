@@ -292,7 +292,9 @@ namespace GB.WinForms
 
         void AddLog(ActionResponse actionResponse)
         {
-            string message = @$"Key: {actionResponse.PressKey}|{actionResponse.SuggestedMove}{Environment.NewLine}{actionResponse.FrameAnalysis}";
+            string message = @$"Key: {actionResponse.PressKey}
+Suggested Move:{actionResponse.SuggestedMove}
+Analysis: {actionResponse.FrameAnalysis}";
             AddLog(message);
         }
 
