@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.AI;
+using System.Diagnostics;
 using System.Runtime;
 using System.Text;
 using System.Text.Json;
@@ -28,17 +29,38 @@ The expected output should be a JSON object with 2 string fields:
 - RecentActivity
 - PressKey
 
+Return only the JSON object as a string.
+
 This is the Recent Activity:
 """;
 
         public async Task<ActionResponse> GenerateNextActionResponse(string imageLocation, string recentActivity)
         {
-            var actionResponse = new ActionResponse();
             var jsonResponse = await GenerateNextAction(imageLocation, recentActivity);
-            // deserialize the JSON response to ActionResponse object
-            actionResponse = JsonSerializer.Deserialize<ActionResponse>(jsonResponse);
-            return actionResponse;
+
+            // Ensure we have valid JSON before deserializing
+            var validJsonResponse = EnsureValidJsonResponse(jsonResponse);
+
+            if (validJsonResponse != null)
+            {
+                try
+                {
+                    return JsonSerializer.Deserialize<ActionResponse>(validJsonResponse);
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Error deserializing JSON: {ex.Message}");
+                }
+            }
+
+            // Fallback if JSON parsing fails completely
+            return new ActionResponse
+            {
+                RecentActivity = recentActivity,
+                PressKey = "Keys.S" // Default key
+            };
         }
+
 
         public async Task<string> GenerateNextAction(string imageLocation, string recentActivity)
         {
@@ -66,10 +88,9 @@ This is the Recent Activity:
             stringBuilder.AppendLine("Ollama: ");
             stringBuilder.AppendLine(imageAnalysis.Message.Text);
             stringBuilder.AppendLine();
-            Console.WriteLine($">> Ollama done");
-            Console.WriteLine();
+            Debug.WriteLine($">> Ollama done");
+            Debug.WriteLine(stringBuilder.ToString());
 
-            Console.WriteLine();
             return imageAnalysis.Message.Text;
         }
 
@@ -85,5 +106,91 @@ This is the Recent Activity:
                 _ => throw new NotSupportedException($"File extension {extension} is not supported"),
             };
         }
+
+        /// <summary>
+        /// Ensures that a string is a valid JSON object containing RecentActivity and PressKey fields.
+        /// Handles common formatting issues and returns a properly formatted JSON string.
+        /// </summary>
+        /// <param name="jsonString">The potentially malformed JSON string</param>
+        /// <returns>A valid JSON string or null if conversion is not possible</returns>
+        public string EnsureValidJsonResponse(string jsonString)
+        {
+            if (string.IsNullOrWhiteSpace(jsonString))
+            {
+                return null;
+            }
+
+            try
+            {
+                // First try direct deserialization
+                var actionResponse = JsonSerializer.Deserialize<ActionResponse>(jsonString);
+                if (actionResponse != null)
+                {
+                    // If successful, return a properly formatted JSON string
+                    return JsonSerializer.Serialize(actionResponse);
+                }
+            }
+            catch (JsonException)
+            {
+                // Continue with cleanup if direct deserialization fails
+            }
+
+            // Clean up common issues
+            string cleaned = jsonString.Trim();
+
+            // Remove any leading/trailing text that isn't part of the JSON object
+            int startBrace = cleaned.IndexOf('{');
+            int endBrace = cleaned.LastIndexOf('}');
+
+            if (startBrace >= 0 && endBrace > startBrace)
+            {
+                cleaned = cleaned.Substring(startBrace, endBrace - startBrace + 1);
+            }
+
+            try
+            {
+                // Try to deserialize the cleaned JSON
+                var actionResponse = JsonSerializer.Deserialize<ActionResponse>(cleaned);
+
+                // If we have valid fields, return properly formatted JSON
+                if (actionResponse != null &&
+                    !string.IsNullOrWhiteSpace(actionResponse.RecentActivity) &&
+                    !string.IsNullOrWhiteSpace(actionResponse.PressKey))
+                {
+                    return JsonSerializer.Serialize(actionResponse);
+                }
+
+                return null;
+            }
+            catch (JsonException)
+            {
+                // Extract values using regex as a last resort
+                try
+                {
+                    var recentActivityMatch = System.Text.RegularExpressions.Regex.Match(
+                        cleaned, @"""RecentActivity""[\s]*:[\s]*""([^""]*)");
+                    var pressKeyMatch = System.Text.RegularExpressions.Regex.Match(
+                        cleaned, @"""PressKey""[\s]*:[\s]*""([^""]*)");
+
+                    if (recentActivityMatch.Success && pressKeyMatch.Success)
+                    {
+                        var actionResponse = new ActionResponse
+                        {
+                            RecentActivity = recentActivityMatch.Groups[1].Value,
+                            PressKey = pressKeyMatch.Groups[1].Value
+                        };
+
+                        return JsonSerializer.Serialize(actionResponse);
+                    }
+                }
+                catch
+                {
+                    // If regex extraction fails, return null
+                }
+
+                return null;
+            }
+        }
+
     }
 }

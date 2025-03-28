@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GB.AI.Ollama\GB.AI.Ollama.csproj" />
     <ProjectReference Include="..\GB.Core\GB.Core.csproj" />
   </ItemGroup>
 

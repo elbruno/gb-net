@@ -3,19 +3,25 @@ using GB.Core.Gui;
 using Button = GB.Core.Controller.Button;
 using GB.WinForms.OsSpecific;
 using GB.Core.Sound;
+using GB.AI.Ollama;
 
 namespace GB.WinForms
 {
     public partial class MainForm : Form, IController
     {
         private IButtonListener? _listener;
-        
+
         private readonly Dictionary<Keys, Button> _controls;
         private CancellationTokenSource _cancellation;
 
         // private readonly ISoundOutput _soundOutput = new NullSoundOutput();
         private readonly ISoundOutput _soundOutput = new SoundOutput();
         private readonly Emulator _emulator;
+
+        // create an instance of the AI Action Generator
+        private readonly ActionGenerator actionGenerator = new ActionGenerator();
+        private string aiRecentActivity = string.Empty;
+        private CancellationTokenSource? _aiLoopCancellation;
 
         public MainForm()
         {
@@ -45,10 +51,14 @@ namespace GB.WinForms
             _cancellation = new CancellationTokenSource();
 
             _emulator.Controller = this;
-            
+
             KeyDown += OnKeyDown;
             KeyUp += OnKeyUp;
-            Closed += (_, e) => { _cancellation.Cancel(); };
+            Closed += (_, e) =>
+            {
+                _cancellation.Cancel();
+                _aiLoopCancellation?.Cancel();
+            };
         }
 
         public void SetButtonListener(IButtonListener listener) => _listener = listener;
@@ -176,5 +186,79 @@ namespace GB.WinForms
 
             _emulator.GameBoyMode = (GameBoyMode)clickedToolStripMenuItem.Tag;
         }
+
+        // AI Stuff
+        private async Task<string> ProcessNextAiActionAsync()
+        {
+            // save the _display content to a local image
+            using var bitmap = new Bitmap(_display.Width, _display.Height);
+            _display.DrawToBitmap(bitmap, new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+
+            // if the file "capture.png" exists, delete it
+            if (File.Exists("capture.png"))
+            {
+                File.Delete("capture.png");
+            }
+
+            // save the image to a file named "capture.png"
+            bitmap.Save("capture.png", System.Drawing.Imaging.ImageFormat.Png);
+
+            // use the AI Action Generator to generate the next action
+            string imageLocation = "capture.png";
+            var actionResponse = await actionGenerator.GenerateNextActionResponse(imageLocation, aiRecentActivity);
+            // get the PressKey from the actionResponse
+            var pressKey = actionResponse.PressKey;
+            aiRecentActivity = actionResponse.RecentActivity;
+            
+            // send a press key action using windows API
+            SendKeys.Send(pressKey);
+
+            return pressKey;
+        }
+
+        private void startToolStripMenuItem_ClickAsync(object sender, EventArgs e)
+        {
+            // Cancel any existing AI loop
+            _aiLoopCancellation?.Cancel();
+
+            // Create a new cancellation token source for the loop
+            _aiLoopCancellation = new CancellationTokenSource();
+
+            try
+            {
+                // Start the AI loop
+                RunAiLoopAsync(_aiLoopCancellation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Loop was cancelled, this is expected
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error in AI loop: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task RunAiLoopAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                string pressedKey = await ProcessNextAiActionAsync();
+
+                // Log the action if needed
+                Console.WriteLine($"AI pressed: {pressedKey}");
+
+                // Wait 1 second before the next action
+                await Task.Delay(1000, cancellationToken);
+            }
+        }
+
+        private void stopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Cancel the AI loop if it's running
+            _aiLoopCancellation?.Cancel();
+            _aiLoopCancellation = null;
+        }
+
     }
 }
