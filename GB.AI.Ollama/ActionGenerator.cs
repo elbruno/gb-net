@@ -95,24 +95,10 @@ This is the Recent Activity:
 
         private static IChatClient GetOllamaChatClient()
         {
-            // OllamaChatClient is a wrapper around the Ollama API
-            var chatOllama = new OllamaChatClient(
-            //new Uri(uriString: "http://localhost:11434/"), "llama3.2-vision");
-            new Uri(uriString: "http://localhost:11434/"), "gemma3");
-            //new Uri(uriString: "http://localhost:11434/"), "granite3.2-vision");
-            return chatOllama;
+            return new OllamaChatClient(
+                new Uri(uriString: "http://localhost:11434/"), "gemma3");
         }
 
-        //private static IChatClient GetAoaiChatClient()
-        //{
-
-        //    var client = new ChatCompletionsClient(
-        //        endpoint: new Uri(endpoint), 
-        //        credential: new AzureKeyCredential(apiKey))
-        //        .AsChatClient("gpt-4o-mini");
-
-        //    return client;
-        //}
 
         public string GetMediaType(string imageLocation)
         {
