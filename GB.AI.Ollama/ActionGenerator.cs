@@ -41,9 +41,9 @@ Tasks:
 Rules:
 - The lower left small ships are not the player, are the remaining lives.
 - Try to kill as much enemies as you can.
-
 - If the player is in the 'Bottom Left' corner of the screen, do not suggest to 'Move Left'.
 - If the player is in the 'Bottom Right' corner of the screen, do not suggest to 'Move Right'.
+- Only fire when you have enemies on top of the player, or when the enemies are moving towards the player location.
 
 ---
 Current Frame:

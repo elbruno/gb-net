@@ -279,7 +279,7 @@ namespace GB.WinForms
             {
                 await ProcessNextAiActionAsync();
                 // Wait 0.05 second before the next action
-                await Task.Delay(50, cancellationToken);
+                //await Task.Delay(50, cancellationToken);
             }
         }
 
